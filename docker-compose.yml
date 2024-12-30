@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - redis
+      - rabbitmq
+
+  downloader:
+    build: ./services/downloader
+    environment:
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+      - rabbitmq
+
+  data-service:
+    build: ./services/data-service
+    environment:
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+      - rabbitmq
+
+  cleanup-service:
+    build: ./services/cleanup-service
+    environment:
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+      - rabbitmq
+
+  fast-detector:
+    build: ./services/fast-detector
+    environment:
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+      - rabbitmq
+
+  detailed-detector:
+    build: ./services/detailed-detector
+    environment:
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - redis
+      - rabbitmq
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"  # AMQP protocol port
+      - "15672:15672"  # Management interface port
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  redis-data:
+  rabbitmq-data:
